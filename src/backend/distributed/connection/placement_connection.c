@@ -429,6 +429,31 @@ StartPlacementListConnection(uint32 flags, List *placementAccessList,
 }
 
 
+MultiConnection *
+GetPlacementListConnectionIfCached(int flags, List *placementAccessList,
+								   const char *userName)
+{
+	MultiConnection *connection = NULL;
+	List *placementEntryList = NIL;
+	char *freeUserName = NULL;
+
+	if (userName == NULL)
+	{
+		userName = freeUserName = CurrentUserName();
+	}
+
+	connection = FindPlacementListConnection(flags, placementAccessList, userName,
+											 &placementEntryList);
+
+	if (freeUserName != NULL)
+	{
+		pfree(freeUserName);
+	}
+
+	return connection;
+}
+
+
 /*
  * FindPlacementListConnection determines whether there is a connection that must
  * be used to perform the given placement accesses.

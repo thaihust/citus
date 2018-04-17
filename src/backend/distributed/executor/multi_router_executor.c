@@ -79,8 +79,6 @@ bool EnableDeadlockPrevention = true;
 
 /* functions needed during run phase */
 static void AcquireMetadataLocks(List *taskList);
-static ShardPlacementAccess * CreatePlacementAccess(ShardPlacement *placement,
-													ShardPlacementAccessType accessType);
 static void ExecuteSingleModifyTask(CitusScanState *scanState, Task *task,
 									bool multipleTasks, bool expectResults);
 static void ExecuteSingleSelectTask(CitusScanState *scanState, Task *task);
@@ -705,7 +703,7 @@ BuildPlacementSelectList(uint32 groupId, List *relationShardList)
  * CreatePlacementAccess returns a new ShardPlacementAccess for the given placement
  * and access type.
  */
-static ShardPlacementAccess *
+ShardPlacementAccess *
 CreatePlacementAccess(ShardPlacement *placement, ShardPlacementAccessType accessType)
 {
 	ShardPlacementAccess *placementAccess = NULL;

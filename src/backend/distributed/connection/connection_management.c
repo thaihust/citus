@@ -761,6 +761,8 @@ AfterXactHostConnectionHandling(ConnectionHashEntry *entry, bool isCommit)
 
 			/* reset copy state */
 			connection->copyBytesWrittenSinceLastFlush = 0;
+			connection->assignedTaskQueue = NIL;
+			connection->currentTask = NULL;
 
 			UnclaimConnection(connection);
 		}
