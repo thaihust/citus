@@ -18,3 +18,9 @@ test: failure_create_table
 test: failure_1pc_copy_hash
 test: failure_1pc_copy_append
 test: failure_multi_shard_update_delete
+test: failure_cte_subquery
+#test: failure_ddl
+#test: failure_truncate
+#test: failure_create_index_concurrently
+#test: failure_add_disable_node
+#test: failure_multi_shard_update_delete

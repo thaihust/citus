@@ -1,0 +1,61 @@
+CREATE SCHEMA cte_failure;
+SET SEARCH_PATH=cte_failure;
+SET citus.shard_count to 8;
+CREATE TABLE users_table (user_id int, user_name text);
+CREATE TABLE events_table(user_id int, event_id int, event_type int);
+CREATE TABLE events_rollup(user_id int, event_id int, count int);
+SELECT create_distributed_table('users_table', 'user_id');
+ create_distributed_table 
+--------------------------
+ 
+(1 row)
+
+SELECT create_distributed_table('events_table', 'user_id');
+ create_distributed_table 
+--------------------------
+ 
+(1 row)
+
+SELECT create_distributed_table('events_rollup', 'user_id');
+ create_distributed_table 
+--------------------------
+ 
+(1 row)
+
+CREATE TABLE users_table_local AS SELECT * FROM users_table;
+WITH cte AS (
+	WITH local_cte AS (
+		SELECT * FROM users_table_local
+	),
+	dist_cte AS (
+		SELECT user_id FROM events_table
+	)
+	SELECT dist_cte.user_id FROM local_cte join dist_cte on dist_cte.user_id=local_cte.user_id
+)
+SELECT 
+	count(*) 
+FROM 
+	cte,
+	  (SELECT 
+    	DISTINCT users_table.user_id 
+     FROM 
+     	users_table, events_table 
+     WHERE 
+     	users_table.user_id = events_table.user_id AND 
+     event_type IN (1,2,3,4)
+     ORDER BY 1 DESC LIMIT 5
+     ) as foo 
+	  WHERE foo.user_id = cte.user_id;
+ count 
+-------
+     0
+(1 row)
+
+
+RESET SEARCH_PATH;
+DROP SCHEMA cte_failure CASCADE;
+NOTICE:  drop cascades to 4 other objects
+DETAIL:  drop cascades to table cte_failure.users_table
+drop cascades to table cte_failure.events_table
+drop cascades to table cte_failure.events_rollup
+drop cascades to table cte_failure.users_table_local
