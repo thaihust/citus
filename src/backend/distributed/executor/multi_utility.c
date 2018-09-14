@@ -3143,6 +3143,7 @@ ExecuteDistributedDDLJob(DDLJob *ddlJob)
 	bool shouldSyncMetadata = ShouldSyncTableMetadata(ddlJob->targetRelationId);
 
 	EnsureCoordinator();
+	EnsurePartitionTableNotReplicated(ddlJob->targetRelationId);
 
 	if (!ddlJob->concurrentIndexCmd)
 	{

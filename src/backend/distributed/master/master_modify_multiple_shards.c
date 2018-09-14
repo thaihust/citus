@@ -38,6 +38,7 @@
 #include "distributed/multi_router_planner.h"
 #include "distributed/multi_server_executor.h"
 #include "distributed/multi_shard_transaction.h"
+#include "distributed/distributed_planner.h"
 #include "distributed/pg_dist_shard.h"
 #include "distributed/pg_dist_partition.h"
 #include "distributed/resource_lock.h"
@@ -151,6 +152,7 @@ master_modify_multiple_shards(PG_FUNCTION_ARGS)
 			rangeVar->schemaname = schemaName;
 		}
 
+		EnsurePartitionTableNotReplicated(relationId);
 		EnsureTablePermissions(relationId, ACL_TRUNCATE);
 
 		if (ShouldExecuteTruncateStmtSequential(truncateStatement))
