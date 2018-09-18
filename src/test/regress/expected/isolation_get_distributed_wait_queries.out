@@ -72,6 +72,78 @@ restore_isolation_tester_func
 
                
 
+starting permutation: s1-start-session-level-connection s1-begin-on-worker s1-update-dist-table s2-start-session-level-connection s2-begin-on-worker s2-update-dist-table s3-select-distributed-waiting-queries s1-commit-worker s2-commit-worker s1-stop-connection s2-stop-connection
+step s1-start-session-level-connection: 
+	SELECT start_session_level_connection_to_node('localhost', 57637);
+
+start_session_level_connection_to_node
+
+               
+step s1-begin-on-worker: 
+	SELECT run_commands_on_session_level_connection_to_node('BEGIN');
+
+run_commands_on_session_level_connection_to_node
+
+               
+step s1-update-dist-table: 
+	SELECT run_commands_on_session_level_connection_to_node('UPDATE tt1 SET value_1 = 4');
+
+run_commands_on_session_level_connection_to_node
+
+               
+step s2-start-session-level-connection: 
+	SELECT start_session_level_connection_to_node('localhost', 57638);
+
+start_session_level_connection_to_node
+
+               
+step s2-begin-on-worker: 
+	SELECT run_commands_on_session_level_connection_to_node('BEGIN');
+
+run_commands_on_session_level_connection_to_node
+
+               
+step s2-update-dist-table: 
+	SELECT run_commands_on_session_level_connection_to_node('UPDATE tt1 SET value_1 = 5');
+ <waiting ...>
+step s3-select-distributed-waiting-queries: 
+	SELECT blocked_statement, current_statement_in_blocking_process FROM citus_lock_waits;
+
+blocked_statementcurrent_statement_in_blocking_process
+
+UPDATE tt1 SET value_1 = 5UPDATE tt1 SET value_1 = 4
+step s1-commit-worker: 
+    SELECT run_commands_on_session_level_connection_to_node('COMMIT');
+
+run_commands_on_session_level_connection_to_node
+
+               
+step s2-update-dist-table: <... completed>
+run_commands_on_session_level_connection_to_node
+
+               
+step s2-commit-worker: 
+    SELECT run_commands_on_session_level_connection_to_node('COMMIT');
+
+run_commands_on_session_level_connection_to_node
+
+               
+step s1-stop-connection: 
+	SELECT stop_session_level_connection_to_node();
+
+stop_session_level_connection_to_node
+
+               
+step s2-stop-connection: 
+	SELECT stop_session_level_connection_to_node();
+
+stop_session_level_connection_to_node
+
+               
+restore_isolation_tester_func
+
+               
+
 starting permutation: s1-start-session-level-connection s1-begin-on-worker s1-delete-from-ref-table s2-start-session-level-connection s2-begin-on-worker s2-update-ref-table s3-select-distributed-waiting-queries s1-commit-worker s2-commit-worker s1-stop-connection s2-stop-connection
 step s1-start-session-level-connection: 
 	SELECT start_session_level_connection_to_node('localhost', 57637);

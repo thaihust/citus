@@ -3,9 +3,14 @@ SET search_path = 'pg_catalog';
 
 CREATE VIEW citus.citus_lock_waits AS
 
-WITH citus_dist_stat_activity AS
+WITH 
+citus_dist_stat_activity AS
 (
   SELECT * FROM citus_dist_stat_activity
+),
+unique_global_wait_edges AS
+(
+	SELECT DISTINCT ON(waiting_node_id, waiting_transaction_num, blocking_node_id, blocking_transaction_num) * FROM dump_global_wait_edges()
 ),
 citus_dist_stat_activity_with_node_id AS
 (
@@ -26,11 +31,11 @@ SELECT
  blocking.initiator_node_id AS blocking_node_id
 
 FROM
- dump_global_wait_edges() as global_wait_edges
+ unique_global_wait_edges
 JOIN
- citus_dist_stat_activity_with_node_id waiting ON (global_wait_edges.waiting_transaction_num = waiting.transaction_number AND global_wait_edges.waiting_node_id = waiting.initiator_node_id)
+ citus_dist_stat_activity_with_node_id waiting ON (unique_global_wait_edges.waiting_transaction_num = waiting.transaction_number AND unique_global_wait_edges.waiting_node_id = waiting.initiator_node_id)
 JOIN
- citus_dist_stat_activity_with_node_id blocking ON (global_wait_edges.blocking_transaction_num = blocking.transaction_number AND global_wait_edges.blocking_node_id = blocking.initiator_node_id);
+ citus_dist_stat_activity_with_node_id blocking ON (unique_global_wait_edges.blocking_transaction_num = blocking.transaction_number AND unique_global_wait_edges.blocking_node_id = blocking.initiator_node_id);
 
 ALTER VIEW citus.citus_lock_waits SET SCHEMA pg_catalog;
 GRANT SELECT ON pg_catalog.citus_lock_waits TO PUBLIC;
